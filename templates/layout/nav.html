@@ -1,0 +1,42 @@
+{% load staticfiles %}
+
+<nav class="navbar-inverse navbar-static-top" role="navigation">
+    <div class="container">
+        <div class="col-lg-4">
+            <a href="/" class="badge-evt">
+            	<img src="{% static 'frontend/images/logo.png' %}" height="50px" style="margin: 10px 5px;" />
+            </a>
+        </div>
+
+        <div class="col-lg-8">
+            {% if request.user.is_authenticated %}
+                <ul class="badge-account-me nav-account nav navbar-nav navbar-right">
+                    <li class="dropdown keepstyle">
+                        <a href="#" class="badge-evt dropdown-toggle" data-toggle="dropdown">
+                            <div class="img-container">
+                                <img class="badge-account-avatar" width="34" height="34" src="{% static 'frontend/images/anon.png' %}">
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="badge-evt" href="#">Settings</a></li>
+                            <li><a class="badge-evt badge-account-logout" href="{% url 'users:logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul class="badge-user-functions">
+                    <li>                        
+                        <a class="badge-upload-btn upload-btn badge-evt" style="padding: 22px 0;" href="{% url 'posts:create' %}"><i class="fa fa-plus fa-lg"></i></a>
+                    </li>
+                </ul>
+            {% else %}
+                <ul class="badge-user-functions">
+                    <li id="jsid-notification-toggle" class="dropdown">
+                        <a href="{% url 'users:login' %}" class="badge-account-login badge-evt btn btn-primary navbar-btn pull-right visitor-signin-btn">Sign in</a>
+                        <a class="badge-upload-btn upload-btn badge-evt" href="{% url 'posts:create' %}"><i class="fa fa-plus fa-lg"></i></a>
+                    </li>
+                </ul>
+            {% endif %}
+        </div>        
+    </div>
+</nav>

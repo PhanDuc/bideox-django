@@ -1,0 +1,165 @@
+{% extends 'layout/base.html' %}
+{% load staticfiles %}
+
+{% block css %}
+{% endblock %}
+
+{% block content_top %}
+    <div class="alert-message-container">
+        <div class="alert-message-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="jsid-alert-message" class="alert alert-success hide" style="margin-top: 10px;">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <span>Fetching data from source ...</span>
+                        </div>
+                        <!-- alert -->
+                    </div>
+                    <!-- / col-md-12 -->
+                </div>
+                <!-- / row -->
+            </div>
+            <!-- / container -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block content_left %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="page-header">
+                    <h1>Submit video</h1>
+                </div>
+            </div>
+            <!-- / col-md-12 -->
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 col-md-push-8 hidden-sm hidden-xs">
+                <div class="user-upload-preview">
+                    <div class="responsivewrapper">
+                        <p class=""><iframe src="" allowfullscreen="" autoplay="0" frameborder="0"></iframe></p>
+                    </div>
+                    <!-- responsivewrapper -->
+                </div>
+                <!-- / user-upload-preview -->
+            </div>
+            <!-- / col-md-4-->
+            <div class="col-md-8 col-md-pull-4">
+                <div class="user-upload-form">
+                    <form class="form-user-upload" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input class="form-control" id="id_video" name="id" value="" type="hidden">
+                            <input class="form-control" id="id_videoDurationFe" name="videoDurationFe" value="" type="hidden">
+
+                            <input id="id_url" class="form-control" placeholder="Paste Video Link..." type="url">
+                            {% if form.id.errors %}
+                                <div id="message_id" class="alert alert-danger">
+                                    {{ form.id.errors }}
+                                </div>
+                            {% endif %}
+                            <!-- / alert -->
+                        </div>
+                        <!-- / form-group -->
+                        <div class="form-group">
+                            <input id="id_name" name="name" class="form-control badge-form-check-object" placeholder="Name" type="text">
+                            {% if form.name.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.name.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <!-- / form-group -->
+                        <div class="form-group">
+                            <textarea name="description" id="id_description" class="form-control" rows="8" placeholder="Description (Optional)"></textarea>
+                        </div>
+                        <!-- / formgroup -->
+                        <div class="form-group">
+                            <label>Channel:</label>
+                            <p>
+                                {% for cat in category %}
+                                <label class="radio-inline">
+                                    <input name="category" value="{{ cat.id }}" type="radio"> {{ cat.name }}
+                                </label>
+                                {% endfor %}
+                            </p>
+                            {% if form.category.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.category.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <!-- / form-group -->
+                        <div class="btn-container">
+                            <button class="btn btn-primary badge-evt" type="submit">Save</button>
+                        </div>
+                        <!-- / btn-container -->
+                    </form>
+                </div>
+                <!-- / user-upload-form -->
+            </div>
+            <!-- / col-md-8 -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block content_right %}
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        var is_busy = False;
+        $("#id_url").on('keyup keypress blur change', function() {
+            if (!is_busy) {
+                is_busy = True;
+                event();
+            };
+        });
+
+        function event() {
+            var str = $('#id_url').val();
+            if (str) {
+                console.log(new Date()); 
+                $('#jsid-alert-message').addClass('alert-success');
+                $('#jsid-alert-message span').text('Fetching data from source ...');
+                $('#jsid-alert-message').removeClass('hide');
+
+                $.get("/parse", { url: str })
+                .done(function(data) {
+                    is_busy = False;
+                    if (data['status']) {
+                        set_value(data['data']);
+                    } else {
+                        $('#jsid-alert-message span').text('Not valid video url');
+                        $('#jsid-alert-message').removeClass('alert-success');
+                        $('#jsid-alert-message').addClass('alert-danger');
+                        clear_all();
+                        setTimeout(function() {
+                            $('#jsid-alert-message').addClass('hide');
+                        }, 3000);
+                    };
+                });
+            } else {
+
+            };
+        };
+
+        function set_value(data) {
+            $('#id_video').val(data.id);
+            $('#id_name').val(data.name);
+            $('#id_videoDurationFe').val(data.videoDurationFe);
+            $('#id_description').val(data.description);
+        };
+
+        function clear_all() {
+            $('#id_url').val('');
+            $('#id_video').val('');
+            $('#id_name').val('');
+            $('#id_videoDurationFe').val('');
+            $('#id_description').val('');  
+        };
+    </script>
+{% endblock %}
